@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspiration Widget</title>
+    <style>
+        body {
+            background-color: #3B3B3B;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .inspiration-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background-color: #3B3B3B;
+            border-radius: 10px;
+            width: 150px;
+            height: 150px; /* Ensuring the container has enough height */
+            text-align: center;
+            position: relative;
+            overflow: hidden; /* Hide anything that overflows the container */
+        }
+
+        #dragon-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-image: url("https://dunnsbunns.github.io/thedunnsbunnsemporium/vecteezy_ai-generated-head-dragon-with-flame-suitable-for-t-shirt_42409320.png");
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .inspiration-container.active #dragon-background {
+            opacity: 1; /* Show dragon background when active */
+        }
+
+        #inspiration-button {
+            padding: 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            width: 120px;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1; /* Ensure button is above the dragon background */
+        }
+
+        #inspiration-button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="inspiration-container" id="inspiration-container">
+        <div id="dragon-background"></div>
+        <button id="inspiration-button" onclick="toggleInspiration()">Inspiration</button>
+    </div>
+
+    <script>
+        let hasInspiration = false;
+
+        function toggleInspiration() {
+            hasInspiration = !hasInspiration;
+
+            const container = document.getElementById('inspiration-container');
+            const dragonBackground = document.getElementById('dragon-background');
+
+            if (hasInspiration) {
+                container.classList.add('active');
+            } else {
+                container.classList.remove('active');
+            }
+        }
+    </script>
+
+</body>
+</html>
