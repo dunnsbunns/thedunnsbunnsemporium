@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspiration Widget</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .inspiration-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background-color: #3B3B3B;
+            border-radius: 10px;
+            width: 120px;
+            text-align: center;
+        }
+
+        .light {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: gray;
+            margin-bottom: 10px;
+        }
+
+        .light.on {
+            background-color: #00c853; /* Green light for inspiration */
+        }
+
+        .inspiration-label {
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        #inspiration-button {
+            padding: 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            width: 80px;
+        }
+
+        #inspiration-button.inspired {
+            background-color: #00c853;
+        }
+
+        #inspiration-button.not-inspired {
+            background-color: #c62828;
+        }
+
+        #inspiration-button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="inspiration-container">
+        <div id="inspiration-light" class="light"></div>
+        <div class="inspiration-label">INSPIRATION</div>
+        <button id="inspiration-button" class="not-inspired" onclick="toggleInspiration()">Not Inspired</button>
+    </div>
+
+    <script>
+        let hasInspiration = false;
+
+        function toggleInspiration() {
+            hasInspiration = !hasInspiration;
+
+            const button = document.getElementById('inspiration-button');
+            const light = document.getElementById('inspiration-light');
+
+            if (hasInspiration) {
+                button.classList.remove('not-inspired');
+                button.classList.add('inspired');
+                button.textContent = 'Inspired';
+                light.classList.add('on');  // Turn on the light
+            } else {
+                button.classList.remove('inspired');
+                button.classList.add('not-inspired');
+                button.textContent = 'Not Inspired';
+                light.classList.remove('on');  // Turn off the light
+            }
+        }
+    </script>
+
+</body>
+</html>
