@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP Counter & Death Save</title>
+    <style>
+        body {
+            background-color: #3B3B3B;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #3B3B3B;
+            width: 350px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .controls, .settings {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        input {
+            width: 50px;
+            padding: 5px;
+            margin: 5px 0;
+            text-align: center;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+        }
+        button {
+            padding: 5px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .hp-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hp-display {
+            display: flex;
+            gap: 10px;
+        }
+        .hp-number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .hp-label {
+            font-size: 14px;
+            font-weight: normal;
+            color: #bbbbbb;
+        }
+        .hit-points-label {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #999999;
+            font-weight: normal;
+        }
+        .death-saves {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        .death-saves.active {
+            display: flex;
+        }
+        .save {
+            width: 30px;
+            height: 30px;
+            border: 2px solid white;
+            border-radius: 50%;
+            background-color: black;
+        }
+        .save.success {
+            background-color: green;
+        }
+        .save.failure {
+            background-color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Left Controls (Heal/Damage) -->
+        <div class="controls">
+            <button onclick="heal()">Heal</button>
+            <input type="number" id="heal-damage-input" placeholder="Amount" value="0" min="0">
+            <button onclick="damage()">Damage</button>
+        </div>
+
+        <!-- HP Display -->
+        <div class="hp-info">
+            <div class="hp-display">
+                <div>
+                    <div class="hp-label">CURRENT</div>
+                    <div class="hp-number" id="current-hp">100</div>
+                </div>
+                <div>/</div>
+                <div>
+                    <div class="hp-label">MAX</div>
+                    <div class="hp-number" id="max-hp">100</div>
+                </div>
+            </div>
+            <div class="hit-points-label">HIT POINTS</div>
+        </div>
+
+        <!-- Right Controls (Temp HP, Max HP) -->
+        <div class="settings">
+            <input type="number" id="temp-hp-input" placeholder="Temp HP" value="0" min="0">
+            <input type="number" id="max-hp-input" placeholder="Max HP" value="100" min="1">
+            <button onclick="setMaxHP()">Set Max</button>
+        </div>
+    </div>
+
+    <!-- Death Saves Section (Hidden initially) -->
+    <div class="container death-saves" id="death-save-container">
+        <h3>Death Saving Throws</h3>
+        <div class="death-saves-grid">
+            <p>Successes</p>
+            <div class="save" id="success-1"></div>
+            <div class="save" id="success-2"></div>
+            <div class="save" id="success-3"></div>
+        </div>
+        <div class="death-saves-grid">
+            <p>Failures</p>
+            <div class="save" id="failure-1"></div>
+            <div class="save" id="failure-2"></div>
+            <div class="save" id="failure-3"></div>
+        </div>
+        <button onclick="resetDeathSaves()">Reset Saves</button>
+    </div>
+
+    <script>
+        let maxHP = 100;
+        let currentHP = 100;
+        let tempHP = 0;
+        let successCount = 0;
+        let failureCount = 0;
+
+        function updateDisplay() {
+            document.getElementById('current-hp').innerText = currentHP;
+            document.getElementById('max-hp').innerText = maxHP;
+
+            if (currentHP <= 0) {
+                document.querySelector('.container').style.display = 'none';
+                document.getElementById('death-save-container').classList.add('active');
+            }
+        }
+
+        function heal() {
+            let healAmount = Math.max(0, parseInt(document.getElementById('heal-damage-input').value));
+            currentHP = Math.min(currentHP + healAmount, maxHP);
+            updateDisplay();
+        }
+
+        function damage() {
+            let damageAmount = Math.max(0, parseInt(document.getElementById('heal-damage-input').value));
+
+            if (tempHP > 0) {
+                let tempDamage = Math.min(tempHP, damageAmount);
+                tempHP -= tempDamage;
+                damageAmount -= tempDamage;
+            }
+
+            currentHP = Math.max(currentHP - damageAmount, 0);
+            updateDisplay();
+        }
+
+        function setMaxHP() {
+            maxHP = Math.max(1, parseInt(document.getElementById('max-hp-input').value));
+            currentHP = Math.min(currentHP, maxHP);
+            updateDisplay();
+        }
+
+        function resetDeathSaves() {
+            successCount = 0;
+            failureCount = 0;
+            currentHP = maxHP; // Bring the character back with max HP
+            document.querySelector('.container').style.display = 'flex';
+            document.getElementById('death-save-container').classList.remove('active');
+            updateSaves();
+            updateDisplay();
+        }
+
+        function updateSaves() {
+            // Update Success Markers
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById('success-' + i).className = i <= successCount ? 'save success' : 'save';
+            }
+            // Update Failure Markers
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById('failure-' + i).className = i <= failureCount ? 'save failure' : 'save';
+            }
+
+            if (successCount >= 3) {
+                alert('You are stable!');
+                resetDeathSaves();
+            } else if (failureCount >= 3) {
+                alert('You have perished...');
+                resetDeathSaves();
+            }
+        }
+
+        updateDisplay();
+    </script>
+
+</body>
+</html>
