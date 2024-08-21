@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP Counter & Death Save</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #3B3B3B;
+            width: 350px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .controls, .settings {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        input {
+            width: 50px;
+            padding: 5px;
+            margin: 5px 0;
+            text-align: center;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+        }
+        button {
+            padding: 5px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #555;
+        }
+        .hp-info {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .hp-display {
+            display: flex;
+            gap: 10px;
+        }
+        .hp-number {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        .hp-label {
+            font-size: 14px;
+            font-weight: normal;
+            color: #bbbbbb;
+        }
+        .hit-points-label {
+            margin-top: 5px;
+            font-size: 14px;
+            color: #999999;
+            font-weight: normal;
+        }
+        .health-bar {
+            width: 100%;
+            height: 10px;
+            background-color: green;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            transition: background-color 0.3s;
+        }
+        .death-saves {
+            display: none;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background-color: #3B3B3B;
+            width: 350px;
+            text-align: center;
+            border-radius: 10px;
+        }
+        .death-saves.active {
+            display: flex;
+        }
+        .save-row {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .save {
+            width: 15px;
+            height: 15px;
+            border: 2px solid white;
+            border-radius: 50%;
+            background-color: black;
+        }
+        .save.success {
+            background-color: green;
+        }
+        .save.failure {
+            background-color: red;
+        }
+        .death-screen {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+            color: red;
+            font-size: 24px;
+            font-family: 'Arial', sans-serif;
+            height: 100vh;
+            width: 100%;
+        }
+        .death-screen.active {
+            display: flex;
+        }
+        .death-text {
+            font-family: 'Creepster', cursive;
+            font-size: 32px;
+            cursor: pointer;
+            text-align: center;
+            width: 350px;
+        }
+        .success-failure-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .save-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+        }
+        .reset-button {
+            display: flex;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="hp-container">
+        <!-- Left Controls (Heal/Damage) -->
+        <div class="controls">
+            <button onclick="heal()">Heal</button>
+            <input type="number" id="heal-damage-input" placeholder="Amount" value="0" min="0">
+            <button onclick="damage()">Damage</button>
+        </div>
+
+        <!-- HP Display -->
+        <div class="hp-info">
+            <div class="health-bar" id="health-bar"></div>
+            <div class="hp-display">
+                <div>
+                    <div class="hp-label">CURRENT</div>
+                    <div class="hp-number" id="current-hp">100</div>
+                </div>
+                <div>/</div>
+                <div>
+                    <div class="hp-label">MAX</div>
+                    <div class="hp-number" id="max-hp">100</div>
+                </div>
+            </div>
+            <div class="hit-points-label">HIT POINTS</div>
+        </div>
+
+        <!-- Right Controls (Temp HP, Max HP) -->
+        <div class="settings">
+            <input type="number" id="temp-hp-input" placeholder="Temp HP" value="0" min="0">
+            <input type="number" id="max-hp-input" placeholder="Max HP" value="100" min="1">
+            <button onclick="setMaxHP()">Set Max</button>
+        </div>
+    </div>
+
+    <!-- Death Saves Section (Hidden initially) -->
+    <div class="container death-saves" id="death-save-container">
+        <div class="save-buttons">
+            <div class="success-failure-buttons">
+                <button onclick="recordSuccess()">SUCCESS</button>
+                <button onclick="recordFailure()">FAILURE</button>
+            </div>
+            <div class="save-row">
+                <div class="save" id="success-1"></div>
+                <div class="save" id="success-2"></div>
+                <div class="save" id="success-3"></div>
+            </div>
+            <div class="save-row">
+                <div class="save" id="failure-1"></div>
+                <div class="save" id="failure-2"></div>
+                <div class="save" id="failure-3"></div>
+            </div>
+            <div class="reset-button">
+                <button onclick="resetDeathSaves()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Death Screen -->
+    <div class="death-screen" id="death-screen">
+        <div class="death-text" onclick="resetFromDeath()">DEATH COMES FOR US ALL</div>
+    </div>
+
+    <script>
+        let maxHP = 100;
+        let currentHP = 100;
+        let tempHP = 0;
+        let successCount = 0;
+        let failureCount = 0;
+
+        function updateDisplay() {
+            document.getElementById('current-hp').innerText = currentHP;
+            document.getElementById('max-hp').innerText = maxHP;
+
+            // Update health bar width and color
+            const healthBar = document.getElementById('health-bar');
+            healthBar.style.width = (currentHP / maxHP * 100) + '%';
+
+            if (currentHP / maxHP > 0.5) {
+                healthBar.style.backgroundColor = 'green';
+            } else if (currentHP / maxHP > 0.2) {
+                healthBar.style.backgroundColor = 'yellow';
+            } else {
+                healthBar.style.backgroundColor = 'red';
+            }
+
+            if (currentHP <= 0) {
+                document.getElementById('hp-container').style.display = 'none';
+                document.getElementById('death-save-container').classList.add('active');
+            }
+        }
+
+        function heal() {
+            let healAmount = Math.max(0, parseInt(document.getElementById('heal-damage-input').value));
+            currentHP = Math.min(currentHP + healAmount, maxHP);
+            updateDisplay();
+        }
+
+        function damage() {
+            let damageAmount = Math.max(0, parseInt(document.getElementById('heal-damage-input').value));
+
+            if (tempHP > 0) {
+                let tempDamage = Math.min(tempHP, damageAmount);
+                tempHP -= tempDamage;
+                damageAmount -= tempDamage;
+            }
+
+            currentHP = Math.max(currentHP - damageAmount, 0);
+            updateDisplay();
+        }
+
+        function setMaxHP() {
+            maxHP = Math.max(1, parseInt(document.getElementById('max-hp-input').value));
+            currentHP = Math.min(currentHP, maxHP);
+            updateDisplay();
+        }
+
+        function resetDeathSaves() {
+            successCount = 0;
+            failureCount = 0;
+            updateSaves();
+        }
+
+        function recordSuccess() {
+            if (successCount < 3) {
+                successCount++;
+                updateSaves();
+                if (successCount === 3) {
+                    resetFromDeath();
+                }
+            }
+        }
+
+        function recordFailure() {
+            if (failureCount < 3) {
+                failureCount++;
+                updateSaves();
+                if (failureCount === 3) {
+                    document.getElementById('death-save-container').style.display = 'none';
+                    document.getElementById('death-screen').classList.add('active');
+                }
+            }
+        }
+
+        function updateSaves() {
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById(`success-${i}`).classList.toggle('success', i <= successCount);
+                document.getElementById(`failure-${i}`).classList.toggle('failure', i <= failureCount);
+            }
+        }
+
+        function resetFromDeath() {
+            document.getElementById('death-screen').classList.remove('active');
+            document.getElementById('death-save-container').classList.remove('active');
+            currentHP = maxHP;
+            updateDisplay();
+            document.getElementById('hp-container').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
