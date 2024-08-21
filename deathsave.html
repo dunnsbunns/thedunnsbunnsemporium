@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Death Save Counter</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Georgia', serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            padding: 20px;
+            border: 2px solid #8B0000;
+            border-radius: 10px;
+            width: 300px;
+            background-color: #2B2B2B;
+        }
+        h3 {
+            color: #FF6347;
+            margin-bottom: 10px;
+        }
+        .death-saves {
+            display: flex;
+            justify-content: space-around;
+            margin: 10px 0;
+        }
+        .save {
+            width: 30px;
+            height: 30px;
+            border: 2px solid white;
+            border-radius: 50%;
+            background-color: black;
+        }
+        .save.success {
+            border-color: green;
+            background-color: green;
+        }
+        .save.failure {
+            border-color: red;
+            background-color: red;
+        }
+        button {
+            padding: 5px 10px;
+            margin: 5px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h3>Death Saving Throws</h3>
+        
+        <p>Successes</p>
+        <div class="death-saves" id="successes">
+            <div class="save" id="success-1"></div>
+            <div class="save" id="success-2"></div>
+            <div class="save" id="success-3"></div>
+        </div>
+
+        <p>Failures</p>
+        <div class="death-saves" id="failures">
+            <div class="save" id="failure-1"></div>
+            <div class="save" id="failure-2"></div>
+            <div class="save" id="failure-3"></div>
+        </div>
+
+        <button onclick="addSuccess()">Add Success</button>
+        <button onclick="addFailure()">Add Failure</button>
+        <button onclick="reset()">Reset</button>
+    </div>
+
+    <script>
+        let successCount = 0;
+        let failureCount = 0;
+
+        function updateSaves() {
+            // Update Success Markers
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById('success-' + i).className = i <= successCount ? 'save success' : 'save';
+            }
+            // Update Failure Markers
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById('failure-' + i).className = i <= failureCount ? 'save failure' : 'save';
+            }
+
+            // Handle death/save scenarios
+            if (successCount >= 3) {
+                alert('You are stable!');
+                reset();
+            } else if (failureCount >= 3) {
+                alert('You have perished...');
+                reset();
+            }
+        }
+
+        function addSuccess() {
+            if (successCount < 3) {
+                successCount++;
+                updateSaves();
+            }
+        }
+
+        function addFailure() {
+            if (failureCount < 3) {
+                failureCount++;
+                updateSaves();
+            }
+        }
+
+        function reset() {
+            successCount = 0;
+            failureCount = 0;
+            updateSaves();
+        }
+
+        updateSaves(); // Initialize
+    </script>
+</body>
+</html>
