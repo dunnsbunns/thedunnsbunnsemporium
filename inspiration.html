@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspiration Button</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .inspiration-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background-color: #3B3B3B;
+            border-radius: 10px;
+            width: 100px;
+            text-align: center;
+        }
+
+        #inspiration-button {
+            padding: 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            width: 80px;
+        }
+
+        #inspiration-button.inspired {
+            background-color: #00c853;
+        }
+
+        #inspiration-button.not-inspired {
+            background-color: #c62828;
+        }
+
+        #inspiration-button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="inspiration-container">
+        <button id="inspiration-button" class="not-inspired" onclick="toggleInspiration()">Not Inspired</button>
+    </div>
+
+    <script>
+        let hasInspiration = false;
+
+        function toggleInspiration() {
+            hasInspiration = !hasInspiration;
+
+            const button = document.getElementById('inspiration-button');
+            if (hasInspiration) {
+                button.classList.remove('not-inspired');
+                button.classList.add('inspired');
+                button.textContent = 'Inspired';
+            } else {
+                button.classList.remove('inspired');
+                button.classList.add('not-inspired');
+                button.textContent = 'Not Inspired';
+            }
+        }
+    </script>
+
+</body>
+</html>
