@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>8-bit Dragon Animation</title>
+    <style>
+        canvas {
+            background-color: #000;
+            display: block;
+            margin: auto;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="dragonCanvas" width="600" height="400"></canvas>
+    
+    <script>
+        const canvas = document.getElementById('dragonCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Load the dragon sprite
+        const dragon = new Image();
+        dragon.src = 'dragon-spritesheet.png';  // A spritesheet with dragon frames
+
+        let frameIndex = 0;
+        let fireBreathing = false;
+
+        // Handle the animation loop
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the dragon frame
+            // Example: Assuming each frame is 64x64 pixels in the spritesheet
+            ctx.drawImage(dragon, frameIndex * 64, 0, 64, 64, 200, 200, 64, 64);
+
+            // Cycle through frames for dragon animation
+            frameIndex = (frameIndex + 1) % 4; // Loop through 4 frames of dragon movement
+
+            // Trigger fire breath
+            if (fireBreathing) {
+                ctx.fillStyle = "orange";
+                ctx.fillRect(260, 220, 100, 20); // Draw simple fire
+            }
+
+            requestAnimationFrame(animate); // Keep the animation loop going
+        }
+
+        // Simulate fire breathing with a keypress
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                fireBreathing = true;
+            }
+        });
+
+        document.addEventListener('keyup', () => {
+            fireBreathing = false;
+        });
+
+        // Start animation when sprite is loaded
+        dragon.onload = () => {
+            animate();
+        };
+    </script>
+</body>
+</html>
