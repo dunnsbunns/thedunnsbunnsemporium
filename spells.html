@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spell Search Widget</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .spell-container {
+            margin-top: 20px;
+        }
+        .spell-item {
+            margin: 10px 0;
+            cursor: pointer;
+            color: blue;
+        }
+        .spell-details {
+            display: none;
+            padding-left: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Spell Search</h1>
+    <input type="text" id="search-bar" placeholder="Search for a spell..." onkeyup="searchSpells()" />
+
+    <div id="spell-list" class="spell-container">
+        <!-- Spell list items will be inserted here by JavaScript -->
+    </div>
+
+    <script>
+        // Sample spell data (you can expand this with more spells or load it from a file)
+        const spells = [
+            {
+                name: "Fireball",
+                level: "3rd",
+                castingTime: "1 action",
+                range: "150 feet",
+                components: "V, S, M (a tiny ball of bat guano and sulfur)",
+                duration: "Instantaneous",
+                description: "A bright streak flashes from your pointing finger to a point you choose within range and then blossoms with a low roar into an explosion of flame."
+            },
+            {
+                name: "Magic Missile",
+                level: "1st",
+                castingTime: "1 action",
+                range: "120 feet",
+                components: "V, S",
+                duration: "Instantaneous",
+                description: "You create three glowing darts of magical force. Each dart hits a creature of your choice that you can see within range."
+            },
+            {
+                name: "Cure Wounds",
+                level: "1st",
+                castingTime: "1 action",
+                range: "Touch",
+                components: "V, S",
+                duration: "Instantaneous",
+                description: "A creature you touch regains hit points equal to 1d8 + your spellcasting ability modifier."
+            }
+            // Add more spells here...
+        ];
+
+        // Function to display the spell list
+        function displaySpells(spellList) {
+            const spellContainer = document.getElementById('spell-list');
+            spellContainer.innerHTML = ''; // Clear previous results
+
+            spellList.forEach((spell, index) => {
+                // Create a clickable spell name
+                const spellItem = document.createElement('div');
+                spellItem.classList.add('spell-item');
+                spellItem.textContent = spell.name;
+                spellItem.onclick = () => toggleSpellDetails(index);
+
+                // Create hidden spell details
+                const spellDetails = document.createElement('div');
+                spellDetails.classList.add('spell-details');
+                spellDetails.id = `spell-details-${index}`;
+                spellDetails.innerHTML = `
+                    <p><strong>Level:</strong> ${spell.level}</p>
+                    <p><strong>Casting Time:</strong> ${spell.castingTime}</p>
+                    <p><strong>Range:</strong> ${spell.range}</p>
+                    <p><strong>Components:</strong> ${spell.components}</p>
+                    <p><strong>Duration:</strong> ${spell.duration}</p>
+                    <p><strong>Description:</strong> ${spell.description}</p>
+                `;
+
+                // Append spell item and details to the container
+                spellContainer.appendChild(spellItem);
+                spellContainer.appendChild(spellDetails);
+            });
+        }
+
+        // Function to toggle the visibility of spell details
+        function toggleSpellDetails(index) {
+            const spellDetails = document.getElementById(`spell-details-${index}`);
+            spellDetails.style.display = spellDetails.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Function to search spells
+        function searchSpells() {
+            const searchTerm = document.getElementById('search-bar').value.toLowerCase();
+            const filteredSpells = spells.filter(spell => spell.name.toLowerCase().includes(searchTerm));
+            displaySpells(filteredSpells);
+        }
+
+        // Initialize the spell list
+        displaySpells(spells);
+    </script>
+
+</body>
+</html>
