@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Dice Roller</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+        }
+        h1 {
+            color: #4CAF50;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .dice-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+        }
+        .dice {
+            position: relative;
+            margin: 10px;
+            background-color: #ddd;
+            border: none;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+            padding: 20px 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+            border-radius: 5px;
+        }
+        .dice:hover {
+            background-color: #ccc;
+        }
+        .dice .count-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: #bbb;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        button.roll-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button.roll-btn:hover {
+            background-color: #45a049;
+        }
+        .result {
+            margin-top: 10px;
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>D&D Dice Roller</h1>
+
+    <div class="dice-container">
+        <button class="dice d4" onclick="incrementDiceCount(4)">d4<span class="count-badge" id="countBadgeD4">0</span></button>
+        <button class="dice d6" onclick="incrementDiceCount(6)">d6<span class="count-badge" id="countBadgeD6">0</span></button>
+        <button class="dice d8" onclick="incrementDiceCount(8)">d8<span class="count-badge" id="countBadgeD8">0</span></button>
+        <button class="dice d10" onclick="incrementDiceCount(10)">d10<span class="count-badge" id="countBadgeD10">0</span></button>
+        <button class="dice d12" onclick="incrementDiceCount(12)">d12<span class="count-badge" id="countBadgeD12">0</span></button>
+        <button class="dice d20" onclick="incrementDiceCount(20)">d20<span class="count-badge" id="countBadgeD20">0</span></button>
+    </div>
+
+    <button class="roll-btn" onclick="rollAllDice()">Roll</button>
+
+    <div class="result" id="resultText"></div>
+
+    <script>
+        let diceCounts = { 4: 0, 6: 0, 8: 0, 10: 0, 12: 0, 20: 0 };
+
+        function incrementDiceCount(sides) {
+            diceCounts[sides]++;
+            document.getElementById(`countBadgeD${sides}`).innerText = diceCounts[sides];
+        }
+
+        function rollAllDice() {
+            let resultText = '';
+            let total = 0;
+
+            for (const sides in diceCounts) {
+                if (diceCounts[sides] > 0) {
+                    let rolls = [];
+                    for (let i = 0; i < diceCounts[sides]; i++) {
+                        const roll = Math.floor(Math.random() * sides) + 1;
+                        rolls.push(roll);
+                        total += roll;
+                    }
+                    resultText += rolls.join(' + ') + ' + ';
+                }
+            }
+
+            // Remove the last ' + ' and add the total
+            if (resultText) {
+                resultText = resultText.slice(0, -3) + ' = ' + total;
+            } else {
+                resultText = 'No dice selected!';
+            }
+
+            document.getElementById('resultText').innerText = resultText;
+
+            // Reset dice counts after rolling
+            resetDiceCounts();
+        }
+
+        function resetDiceCounts() {
+            for (const sides in diceCounts) {
+                diceCounts[sides] = 0;
+                document.getElementById(`countBadgeD${sides}`).innerText = '0';
+            }
+        }
+    </script>
+
+</body>
+</html>
