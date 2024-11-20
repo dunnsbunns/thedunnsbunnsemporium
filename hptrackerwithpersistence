@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP Tracker with Persistence</title>
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .hp-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+            background-color: #3B3B3B;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+
+        .health-bar {
+            width: 100%;
+            height: 10px;
+            background-color: red;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        button {
+            padding: 5px 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="hp-container">
+        <div class="health-bar" id="health-bar"></div>
+        <div>
+            <h2 id="hp-display"></h2>
+        </div>
+        <div class="controls">
+            <input type="number" id="adjustment" placeholder="Enter value" />
+            <button onclick="adjustHP(true)">Heal</button>
+            <button onclick="adjustHP(false)">Damage</button>
+        </div>
+        <div class="controls">
+            <input type="number" id="temp-hp" placeholder="Temp HP" />
+            <button onclick="updateTempHP()">Set Temp HP</button>
+        </div>
+        <div class="controls">
+            <input type="number" id="max-hp" placeholder="Max HP" />
+            <button onclick="updateMaxHP()">Set Max HP</button>
+        </div>
+    </div>
+
+    <script>
+        // Default HP values
+        let currentHP = 50;
+        let maxHP = 100;
+        let tempHP = 0;
+
+        // Load saved state from localStorage
+        function loadState() {
+            const savedState = JSON.parse(localStorage.getItem('hpTrackerState'));
+            if (savedState) {
+                currentHP = savedState.currentHP;
+                maxHP = savedState.maxHP;
+                tempHP = savedState.tempHP;
+            }
+        }
+
+        // Save state to localStorage
+        function saveState() {
+            const state = {
+                currentHP,
+                maxHP,
+                tempHP
+            };
+            localStorage.setItem('hpTrackerState', JSON.stringify(state));
+        }
+
+        // Update the health bar and display
+        function updateUI() {
+            const healthBar = document.getElementById('health-bar');
+            const hpDisplay = document.getElementById('hp-display');
+
+            const effectiveHP = currentHP + tempHP;
+            const healthPercentage = Math.max(0, Math.min(100, (effectiveHP / maxHP) * 100));
+
+            healthBar.style.width = `${healthPercentage}%`;
+            healthBar.style.backgroundColor =
+                healthPercentage > 50 ? 'green' : healthPercentage > 25 ? 'yellow' : 'red';
+
+            hpDisplay.innerText = `${currentHP}/${maxHP} (Temp: ${tempHP})`;
+
+            saveState();
+        }
+
+        // Heal or deal damage
+        function adjustHP(isHeal) {
+            const adjustment = parseInt(document.getElementById('adjustment').value) || 0;
+            if (isHeal) {
+                currentHP = Math.min(currentHP + adjustment, maxHP);
+            } else {
+                currentHP = Math.max(currentHP - adjustment, 0);
+            }
+            updateUI();
+        }
+
+        // Update temporary HP
+        function updateTempHP() {
+            tempHP = parseInt(document.getElementById('temp-hp').value) || 0;
+            updateUI();
+        }
+
+        // Update max HP
+        function updateMaxHP() {
+            maxHP = parseInt(document.getElementById('max-hp').value) || maxHP;
+            currentHP = Math.min(currentHP, maxHP); // Adjust current HP if max HP decreases
+            updateUI();
+        }
+
+        // Initialize
+        loadState();
+        updateUI();
+    </script>
+</body>
+</html>
