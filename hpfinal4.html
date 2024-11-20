@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HP Tracker with Saving Throws</title>
+    <style>
+        body {
+            background-color: #3B3B3B;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+        }
+
+        .widget {
+            padding: 10px;
+            background-color: #3B3B3B;
+            border-radius: 10px;
+            width: 350px;
+            text-align: center;
+            display: none;
+        }
+
+        .active {
+            display: block;
+        }
+
+        /* HP Tracker */
+        .hp-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .input-section, .temp-max-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .input-section input, .temp-max-section input {
+            width: 50px;
+            text-align: center;
+            margin-bottom: 5px;
+            border: 1px solid #555;
+            border-radius: 3px;
+            padding: 3px;
+            background-color: #555;
+            color: white;
+        }
+
+        .input-section button, .temp-max-section button {
+            padding: 5px 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .hp-display {
+            flex-grow: 1;
+            text-align: center;
+        }
+
+        .hp-display h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .hp-display p {
+            font-size: 12px;
+            margin: 0;
+            color: lightgray;
+        }
+
+        .health-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: #555;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .health-bar {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        /* Saving Throws */
+        .saving-throws {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .saving-throws button {
+            padding: 5px 10px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .circles {
+            display: flex;
+            gap: 5px;
+        }
+
+        .circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: gray;
+        }
+
+        .circle.success {
+            background-color: green;
+        }
+
+        .circle.failure {
+            background-color: red;
+        }
+
+        /* Death Screen */
+        .death-screen h1 {
+            font-size: 24px;
+            font-family: 'Creepster', sans-serif;
+            text-shadow: 2px 2px 4px black;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- HP Tracker -->
+    <div class="widget hp-widget active" id="hp-widget">
+        <div class="hp-container">
+            <div class="input-section">
+                <input type="number" id="adjustment" placeholder="0" />
+                <button onclick="adjustHP(true)">Heal</button>
+                <button onclick="adjustHP(false)">Damage</button>
+            </div>
+            <div class="hp-display">
+                <div class="health-bar-container">
+                    <div id="health-bar" class="health-bar"></div>
+                </div>
+                <h1 id="hp-display">50/100</h1>
+                <p>HIT POINTS</p>
+            </div>
+            <div class="temp-max-section">
+                <input type="number" id="temp-hp" placeholder="Temp" />
+                <button onclick="updateTempHP()">Set Temp</button>
+                <input type="number" id="max-hp" placeholder="Max" />
+                <button onclick="updateMaxHP()">Set Max</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saving Throws -->
+    <div class="widget saving-throws-widget" id="saving-throws-widget">
+        <div class="saving-throws">
+            <div>
+                <button onclick="recordSuccess()">Success</button>
+                <button onclick="recordFailure()">Failure</button>
+            </div>
+            <div>
+                <div class="circles">
+                    <div id="success1" class="circle"></div>
+                    <div id="success2" class="circle"></div>
+                    <div id="success3" class="circle"></div>
+                </div>
+                <div class="circles">
+                    <div id="failure1" class="circle"></div>
+                    <div id="failure2" class="circle"></div>
+                    <div id="failure3" class="circle"></div>
+                </div>
+            </div>
+            <button onclick="resetSavingThrows()">Reset</button>
+        </div>
+    </div>
+
+    <!-- Death Screen -->
+    <div class="widget death-screen" id="death-screen">
+        <h1 onclick="resetToFullHealth()">DEATH COMES FOR US ALL</h1>
+    </div>
+
+    <script>
+        let currentHP = 50;
+        let maxHP = 100;
+        let tempHP = 0;
+        let successes = 0;
+        let failures = 0;
+
+        // Load previous state from localStorage
+        function loadState() {
+            currentHP = parseInt(localStorage.getItem("currentHP")) || 50;
+            maxHP = parseInt(localStorage.getItem("maxHP")) || 100;
+            tempHP = parseInt(localStorage.getItem("tempHP")) || 0;
+            successes = parseInt(localStorage.getItem("successes")) || 0;
+            failures = parseInt(localStorage.getItem("failures")) || 0;
+        }
+
+        function updateUI() {
+            document.getElementById("hp-display").textContent = `${currentHP}/${maxHP}`;
+            let healthBar = document.getElementById("health-bar");
+            let healthPercentage = (currentHP / maxHP) * 100;
+            healthBar.style.width = healthPercentage + "%";
+
+            if (healthPercentage > 50) {
+                healthBar.style.backgroundColor = "green";
+            } else if (healthPercentage > 20) {
+                healthBar.style.backgroundColor = "yellow";
+            } else {
+                healthBar.style.backgroundColor = "red";
+            }
+
+            localStorage.setItem("currentHP", currentHP);
+            localStorage.setItem("maxHP", maxHP);
+            localStorage.setItem("tempHP", tempHP);
+        }
+
+        function adjustHP(isHealing) {
+            const adjustmentValue = parseInt(document.getElementById("adjustment").value) || 0;
+            if (isHealing) {
+                currentHP = Math.min(currentHP + adjustmentValue, maxHP);
+            } else {
+                currentHP = Math.max(currentHP - adjustmentValue, 0);
+            }
+
+            if (currentHP <= 0) {
+                switchToWidget("saving-throws-widget");
+            }
+
+            updateUI();
+        }
+
+        function updateTempHP() {
+            tempHP = parseInt(document.getElementById("temp-hp").value) || 0;
+            localStorage.setItem("tempHP", tempHP);
+        }
+
+        function updateMaxHP() {
+            maxHP = parseInt(document.getElementById("max-hp").value) || 100;
+            localStorage.setItem("maxHP", maxHP);
+            updateUI();
+        }
+
+        function recordSuccess() {
+            if (successes < 3) {
+                successes++;
+                document.getElementById(`success${successes}`).classList.add("success");
+                localStorage.setItem("successes", successes);
+
+                if (successes === 3) {
+                    currentHP = 1;
+                    switchToWidget("hp-widget");
+                }
+            }
+        }
+
+        function recordFailure() {
+            if (failures < 3) {
+                failures++;
+                document.getElementById(`failure${failures}`).classList.add("failure");
+                localStorage.setItem("failures", failures);
+
+                if (failures === 3) {
+                    switchToWidget("death-screen");
+                }
+            }
+        }
+
+        function resetSavingThrows() {
+            successes = 0;
+            failures = 0;
+            localStorage.setItem("successes", successes);
+            localStorage.setItem("failures", failures);
+
+            document.querySelectorAll(".circle").forEach(circle => circle.classList.remove("success", "failure"));
+        }
+
+        function switchToWidget(widgetId) {
+            document.querySelectorAll(".widget").forEach(widget => widget.classList.remove("active"));
+            document.getElementById(widgetId).classList.add("active");
+        }
+
+        function resetToFullHealth() {
+            currentHP = maxHP;
+            successes = 0;
+            failures = 0;
+            localStorage.clear();
+            updateUI();
+            switchToWidget("hp-widget");
+        }
+
+        loadState();
+        updateUI();
+    </script>
+</body>
+</html>
